@@ -74,7 +74,7 @@ from fpiweb.forms import BoxItemForm, \
     ExpYearForm, \
     NewBoxNumberForm, \
     BoxTypeForm, \
-    ExistingBoxTypeForm
+    ExistingBoxTypeForm, DeleteUserForm, EditUserForm, AddUserForm
 from fpiweb.qr_code_utilities import QRCodePrinter
 from fpiweb.support.BoxManagement import BoxManagementClass
 
@@ -353,7 +353,7 @@ class LocBinDeleteView(LoginRequiredMixin, DeleteView):
 
 class AddUserView(FormView):
     template_name = 'fpiweb/create_user.html'
-    form_class = CreateUserForm
+    form_class = AddUserForm
     success_url = reverse_lazy('fpiweb:index')
 
     def form_valid(self, form):

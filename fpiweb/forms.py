@@ -227,6 +227,25 @@ class LoginForm(Form):
                          widget=PasswordInput)
 
 
+class AddUserForm(Form):
+    username = CharField(label='Username', max_length=100, )
+
+    password = CharField(label='Password', max_length=100,
+                         widget=PasswordInput)
+
+
+class EditUserForm(Form):
+    new_username = CharField(label='Change User Name', max_length=100, )
+
+    new_password = CharField(label='Change Password', max_length=100,
+                             widget=PasswordInput)
+
+
+class DeleteUserForm(Form):
+    username = CharField(label='User Name', max_length=100, )
+    # The working form should display the list of users in the database as a checklist and have option to delete
+
+
 class LocRowForm(forms.ModelForm):
     """
     Manage Loction row details with a generic form.
