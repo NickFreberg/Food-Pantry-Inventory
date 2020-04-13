@@ -1,6 +1,6 @@
 {% extends 'fpiweb/base.html' %}
 {% load bootstrap4 %}
-{% block title %}Create New User{% endblock %}
+{% block title %}Create A New User{% endblock %}
 
 {% block content %}
 
@@ -10,6 +10,7 @@
     <form action="" method="post">
         {% csrf_token %}
         {% bootstrap_field form.username %}
+        {% bootstrap_field form.email %}
         {% bootstrap_field form.password %}
         <input type="submit" value="Create">
     </form>

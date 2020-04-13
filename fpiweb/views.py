@@ -354,15 +354,17 @@ class LocBinDeleteView(LoginRequiredMixin, DeleteView):
 class AddUserView(FormView):
     template_name = 'fpiweb/create_user.html'
     form_class = AddUserForm
-    success_url = reverse_lazy('fpiweb:index')
+    success_url = reverse_lazy('fpiweb:create_user')
 
     def form_valid(self, form):
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
+        username = form.cleaned_data.get('Username')
+        email = form.cleaned_data.get('Email Address')
+        password = form.cleaned_data.get('Password')
 
         user = authenticate(
             request=self.request,
             username=username,
+            email=email,
             password=password
         )
 
@@ -380,7 +382,7 @@ class AddUserView(FormView):
 
 
 class EditUserView(FormView):
-    template_name = 'fpiweb/create_user.html'
+    template_name = 'fpiweb/edit_user.html'
     form_class = EditUserForm
     success_url = reverse_lazy('fpiweb:index')
 
@@ -408,7 +410,7 @@ class EditUserView(FormView):
 
 
 class DeleteUserView(FormView):
-    template_name = 'fpiweb/create_user.html'
+    template_name = 'fpiweb/delete_user.html'
     form_class = DeleteUserForm
     success_url = reverse_lazy('fpiweb:index')
 
@@ -435,6 +437,7 @@ class DeleteUserView(FormView):
         return super().form_valid(form)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 class LocTierListView(LoginRequiredMixin, ListView):
     """
