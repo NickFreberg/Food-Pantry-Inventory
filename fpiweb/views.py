@@ -348,6 +348,93 @@ class LocBinDeleteView(LoginRequiredMixin, DeleteView):
                                     kwargs={'pk': self.get_object().id})
         return context
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+class AddUserView(FormView):
+    template_name = 'fpiweb/create_user.html'
+    form_class = CreateUserForm
+    success_url = reverse_lazy('fpiweb:index')
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+
+        user = authenticate(
+            request=self.request,
+            username=username,
+            password=password
+        )
+
+        if user is None:
+            form.add_error(None, "Invalid username and/or password")
+            return self.form_invalid(form)
+
+        login(self.request, user)
+        profile = Profile.objects.get_or_create(
+            user_id=user.id,
+            defaults={'title': 'User'},
+        )
+
+        return super().form_valid(form)
+
+
+class EditUserView(FormView):
+    template_name = 'fpiweb/create_user.html'
+    form_class = EditUserForm
+    success_url = reverse_lazy('fpiweb:index')
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+
+        user = authenticate(
+            request=self.request,
+            username=username,
+            password=password
+        )
+
+        if user is None:
+            form.add_error(None, "Invalid username and/or password")
+            return self.form_invalid(form)
+
+        login(self.request, user)
+        profile = Profile.objects.get_or_create(
+            user_id=user.id,
+            defaults={'title': 'User'},
+        )
+
+        return super().form_valid(form)
+
+
+class DeleteUserView(FormView):
+    template_name = 'fpiweb/create_user.html'
+    form_class = DeleteUserForm
+    success_url = reverse_lazy('fpiweb:index')
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+
+        user = authenticate(
+            request=self.request,
+            username=username,
+            password=password
+        )
+
+        if user is None:
+            form.add_error(None, "Invalid username and/or password")
+            return self.form_invalid(form)
+
+        login(self.request, user)
+        profile = Profile.objects.get_or_create(
+            user_id=user.id,
+            defaults={'title': 'User'},
+        )
+
+        return super().form_valid(form)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LocTierListView(LoginRequiredMixin, ListView):
     """

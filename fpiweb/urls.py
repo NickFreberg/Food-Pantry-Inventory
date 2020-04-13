@@ -153,11 +153,11 @@ urlpatterns = [
 
     # Edit_User Page
     # e.g. /fpiweb/edit_user
-    path('add_user', AddUserView.as_view(), name='add_user'),
+    path('edit_user', EditUserView.as_view(), name='edit_user'),
 
-    # Edit_User Page
-    # e.g. /fpiweb/edit_user
-    path('add_user', AddUserView.as_view(), name='add_user'),
+    # Delete Page
+    # e.g. /fpiweb/delete_user
+    path('delete_user', DeleteUserView.as_view(), name='delete_user'),
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
