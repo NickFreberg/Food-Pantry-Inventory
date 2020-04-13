@@ -52,7 +52,7 @@ from fpiweb.views import \
     ManualCheckinBoxView, \
     ManualConsumeBoxView, \
     ManualBoxStatusView, \
-    ManualNewBoxView
+    ManualNewBoxView, AddUserView, EditUserView, DeleteUserView
 
 # from fpiweb.views import ConstraintDetailView
 
