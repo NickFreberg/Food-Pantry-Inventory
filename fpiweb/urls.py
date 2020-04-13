@@ -146,6 +146,21 @@ urlpatterns = [
     # e.g. /fpiweb/loc_tier/delete/4/ = delete loc_tier # 4
     path('loc_tier/delete/<int:pk>/', LocTierDeleteView.as_view(),
          name='loc_tier_delete', ),
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add_User Page
+    # e.g. /fpiweb/add_user
+    path('add_user', AddUserView.as_view(), name='add_user'),
+
+    # Edit_User Page
+    # e.g. /fpiweb/edit_user
+    path('add_user', AddUserView.as_view(), name='add_user'),
+
+    # Edit_User Page
+    # e.g. /fpiweb/edit_user
+    path('add_user', AddUserView.as_view(), name='add_user'),
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
     # Constraint List page
     # e.g. /fpiweb/constraints/ = list of constraints
