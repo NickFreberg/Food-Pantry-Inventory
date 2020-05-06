@@ -152,7 +152,7 @@ managing sessions.  To prepare for this, do the following:
 
 #.  Test this by starting the server and going to the following URL.
 
-    ::
+    ::SQLAlchemy
 
         http://localhost:8765/admin/
 
