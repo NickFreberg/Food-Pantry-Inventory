@@ -384,7 +384,7 @@ class AddUserView(FormView):
 class EditUserView(FormView):
     template_name = 'fpiweb/edit_user.html'
     form_class = EditUserForm
-    success_url = reverse_lazy('fpiweb:index')
+    success_url = reverse_lazy('fpiweb:edit_user')
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
@@ -412,7 +412,7 @@ class EditUserView(FormView):
 class DeleteUserView(FormView):
     template_name = 'fpiweb/delete_user.html'
     form_class = DeleteUserForm
-    success_url = reverse_lazy('fpiweb:index')
+    success_url = reverse_lazy('fpiweb:delete_user')
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')

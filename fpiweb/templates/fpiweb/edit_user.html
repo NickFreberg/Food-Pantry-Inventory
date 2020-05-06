@@ -1,0 +1,17 @@
+{% extends 'fpiweb/base.html' %}
+{% load bootstrap4 %}
+{% block title %}Edit A User{% endblock %}
+
+{% block content %}
+
+    {# creates <ul> with classes errorlist nonfield #}
+    {{ form.non_field_errors }}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {% bootstrap_field form.new_username %}
+        {% bootstrap_field form.new_password %}
+        <input type="submit" value="Submit">
+    </form>
+
+{% endblock %}
