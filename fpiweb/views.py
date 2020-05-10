@@ -1745,8 +1745,7 @@ class ManualBoxStatusView(LoginRequiredMixin, View):
                 mode=self.MODE_ENTER_BOX_NUMBER,
                 box_number_form=box_number_form,
                 errors=[(
-                    f"Box {box_number_form.get('box_number')} not in "
-                    f"inventory"
+                    f"The Box could not be located. Try again."
                 )],
             )
             return render(
