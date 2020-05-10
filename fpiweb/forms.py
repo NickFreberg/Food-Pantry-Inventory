@@ -654,6 +654,7 @@ class BuildPalletForm(forms.ModelForm):
         )
 
     def clean(self):
+
         cleaned_data = super().clean()
 
         # The values returned are LocRow, LocBin, and LocTier objects
@@ -667,9 +668,10 @@ class BuildPalletForm(forms.ModelForm):
                 loc_bin=loc_bin,
                 loc_tier=loc_tier,
             )
+
         except Location.DoesNotExist:
             raise forms.ValidationError(
-                "Location row={} bin={} tier={} not found.".format(
+                "Locations row={} bin={} tier={} not found.".format(
                     loc_row.loc_row,
                     loc_bin.loc_bin,
                     loc_tier.loc_tier,

@@ -18,11 +18,11 @@ __author__ = '(Multiple)'
 __project__ = "Food-Pantry-Inventory"
 __creation_date__ = "04/01/2019"
 
-
 MONTH_VALIDATORS = [
     MinValueValidator(1),
     MaxValueValidator(12),
 ]
+
 
 class LocRow(models.Model):
     """
@@ -394,7 +394,6 @@ class Product(models.Model):
 
 
 class BoxNumber:
-
     # This regex may be used to determine if string is a properly formatted
     # box number.
     box_number_regex = re_compile(r'^BOX\d{5}$')
@@ -666,8 +665,17 @@ class Pallet(models.Model):
 
     def __str__(self) -> str:
         """ Display the information about this pallet. """
-        display = f'Pallet for {self.name} - ' \
-                  f'status: {self.pallet_status}'
+
+
+        if len(self.pallet_status) < 1:
+            display = f'Pallet for {self.name} - ' \
+                    f'status: {self.pallet_status} Default : Fill'
+
+        else:
+
+            display = f'Pallet for {self.name} - ' \
+                      f'status: {self.pallet_status} '
+
         return display
 
 
@@ -1015,9 +1023,8 @@ class Constraints(models.Model):
         (LOCATION_EXCLUSIONS, 'Warehouse locations excluded from inventory'),
         (QUANTITY_LIMIT, 'Typical count of items in a box'),
         (FUTURE_EXP_YEAR_LIMIT,
-            'Maximum years of future expiration permitted'),
+         'Maximum years of future expiration permitted'),
     )
-
 
     # Constraint Type Choice Names
     INT_RANGE = 'Int-MM'
@@ -1120,6 +1127,7 @@ class Constraints(models.Model):
         try:
             constraint = Constraints.objects.get(
                 constraint_name__iexact=constraint_name)
+
         except Constraints.DoesNotExist:
             return None
 
