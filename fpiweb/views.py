@@ -439,27 +439,304 @@ class DeleteUserView(FormView):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class MovePalletView(FormView):
-    template_name = 'fpiweb/move_pallet.html'
-    form_class = MovePalletForm
-    success_url = reverse_lazy('fpiweb:move_pallet')
+    form_template = 'fpiweb/move_pallet.html'
+    confirmation_template = 'fpiweb/build_pallet_confirmation.html'
 
-    def form_valid(self, form):
-        pallet = form.cleaned_data.get('pallet')
-        location = form.cleaned_data.get('location')
+    build_pallet_form_prefix = 'move_pallet'
+    formset_prefix = 'box_forms'
+    hidden_pallet_form_prefix = 'pallet'
 
-        user = authenticate(
-            request=self.request,
-            pallet=pallet,
-            location=location
+    page_title = 'Move Pallet'
+
+    BoxFormFactory = formset_factory(
+        BoxItemForm,
+        extra=0,
+    )
+
+    PALLET_SELECT_FORM_NAME = 'pallet_select_form'
+    PALLET_NAME_FORM_NAME = 'pallet_name_form'
+
+    def show_forms_response(
+            self,
+            request,
+            move_pallet_form,
+            box_forms,
+            pallet_form,
+            status=400):
+        """
+        Display page with BuildPalletForm and BoxItemForms
+        :param request:
+        :param move_pallet_form:
+        :param box_forms:
+        :param pallet_form:
+        :param status:
+        :return:
+        """
+
+        return render(
+            request,
+            self.form_template,
+            {
+                'form': move_pallet_form,
+                'box_forms': box_forms,
+                'pallet_form': pallet_form,
+            },
+            status=status,
         )
 
-        if pallet is None:
-            form.add_error(None, "Invalid pallet")
-            return self.form_invalid(form)
+    @staticmethod
+    def show_pallet_management_page(
+            request,
+            pallet_select_form=None,
+            pallet_name_form=None,
+            status_code=200):
+
+        return PalletManagementView.show_page(
+            request,
+            page_title=MovePalletView.page_title,
+            prompt="Select an existing pallet or create a new one to continue",
+            show_delete=False,
+            pallet_select_form=pallet_select_form,
+            pallet_name_form=pallet_name_form,
+            status_code=status_code,
+        )
+
+    def get(self, request):
+        # Show page to select/add new pallet.  This page will POST back to this
+        # view
+        return self.show_pallet_management_page(request)
+
+    def post(self, request):
+        # BuildPalletView.post
+
+        logger.debug(f"POST data is {request.POST}")
+
+        # The forms in pallet_management.html have a form_name input to help
+        # us sort out which form is being submitted.
+        form_name = request.POST.get('form_name')
+
+        if form_name is None:
+            # Processing contents of build_pallet.html
+            return self.process_build_pallet_forms(request)
+
+        if form_name not in [
+            self.PALLET_SELECT_FORM_NAME,
+            self.PALLET_NAME_FORM_NAME
+        ]:
+            message = f"Unexpected form name {repr(form_name)}"
+            logger.error(message)
+            return error_page(
+                request,
+                message=message,
+                status=500
+            )
+
+        pallet = None
+        if form_name == self.PALLET_SELECT_FORM_NAME:
+            pallet_select_form = PalletSelectForm(request.POST)
+            if not pallet_select_form.is_valid():
+                return self.show_pallet_management_page(
+                    request,
+                    pallet_select_form=pallet_select_form,
+                    status_code=400,
+                )
+            pallet = pallet_select_form.cleaned_data.get('pallet')
+
+        if form_name == self.PALLET_NAME_FORM_NAME:
+            pallet_name_form = PalletNameForm(request.POST)
+            if not pallet_name_form.is_valid():
+                return self.show_pallet_management_page(
+                    request,
+                    pallet_name_form=pallet_name_form,
+                    status_code=400,
+                )
+            pallet = pallet_name_form.save()
+
+        if not pallet:
+            message = f"pallet not set"
+            logger.error(message)
+            return error_page(
+                request,
+                message=message,
+                status=500,
+            )
+
+        # Load boxes (PalletBox records) for pallet
+        pallet_boxes = pallet.boxes.all()
+
+        initial_data = []
+        for pallet_box in pallet_boxes:
+            form_data = {
+                'box_number': pallet_box.box_number,
+                'product': pallet_box.product,
+                'exp_year': pallet_box.exp_year,
+                'exp_month_start': pallet_box.exp_month_start,
+                'exp_month_end': pallet_box.exp_month_end,
+            }
+            print("adding {} to initial_data".format(form_data))
+            initial_data.append(form_data)
+
+        move_pallet_form = MovePalletForm(
+            prefix=self.move_pallet_form_prefix,
+            instance=pallet.location,
+        )
+
+        box_forms = self.BoxFormFactory(
+            initial=initial_data,
+            prefix=self.formset_prefix,
+        )
+
+        pallet_form = HiddenPalletForm(
+            prefix=self.hidden_pallet_form_prefix,
+            initial={
+                'pallet': pallet,
+            },
+        )
+
+        return self.show_forms_response(
+            request,
+            move_pallet_form,
+            box_forms,
+            pallet_form,
+            status=200,
+        )
+
+    def process_build_pallet_forms(self, request):
+
+        move_pallet_form = MovePalletForm(
+            request.POST,
+            prefix=self.move_pallet_form_prefix
+        )
+        box_forms = self.BoxFormFactory(
+            request.POST,
+            prefix=self.formset_prefix,
+        )
+        pallet_form = HiddenPalletForm(
+            request.POST,
+            prefix=self.hidden_pallet_form_prefix,
+        )
+
+        move_pallet_form_valid = move_pallet_form.is_valid()
+        if not move_pallet_form_valid:
+            logger.debug("BuildPalletForm not valid")
+
+        box_forms_valid = box_forms.is_valid()
+        if not box_forms_valid:
+            logger.debug("BoxForms not valid")
+
+        pallet_form_valid = pallet_form.is_valid()
+        if not pallet_form_valid:
+            logger.debug("HiddenPalletForm not valid")
+
+        if not all([
+            move_pallet_form_valid,
+            box_forms_valid,
+            pallet_form_valid
+        ]):
+            return self.show_forms_response(
+                request,
+                move_pallet_form,
+                box_forms,
+                pallet_form,
+            )
+
+        location = move_pallet_form.instance
+
+        pallet = pallet_form.cleaned_data.get('pallet')
+        pallet.location = location
+        pallet.save()
+
+        # Update box records and
+        boxes_by_box_number = OrderedDict()
+        duplicate_box_numbers = set()
+        forms_missing_box_number = 0
+        for i, box_form in enumerate(box_forms):
+            cleaned_data = box_form.cleaned_data
+            if not cleaned_data:
+                continue
+
+            box_number = cleaned_data.get('box_number')
+            if not isinstance(box_number, str):
+                logger.error(f"box_number {box_number} is a {type(box_number)}")
+                continue
+
+            # Is this a duplicate box_id?
+            if box_number in boxes_by_box_number:
+                duplicate_box_numbers.add(box_number)
+                continue
+
+            # Is box_number present in database?
+            try:
+                pallet_box = PalletBox.objects.get(
+                    pallet=pallet,
+                    box_number=box_number
+                )
+                logger.debug(f"found existing box {box_number}")
+            except PalletBox.DoesNotExist:
+                pallet_box = PalletBox(
+                    box_number=box_number,
+                )
+                logger.debug(f"Created new box {box_number}")
+
+            pallet_box.pallet = pallet
+            pallet_box.product = cleaned_data.get('product')
+            pallet_box.exp_year = cleaned_data.get('exp_year')
+            pallet_box.exp_month_start = cleaned_data.get('exp_month_start', 0)
+            pallet_box.exp_month_end = cleaned_data.get('exp_month_end', 0)
+
+            # Does the pallet_box have a box?
+            if not pallet_box.box:
+                box, created = Box.objects.get_or_create(
+                    box_number=box_number,
+                    box_type=Box.box_type_default(),
+                )
+                pallet_box.box = box
+
+            pallet_box.save()
+
+            boxes_by_box_number[box_number] = pallet_box
+
+            # When the box was scanned it would have been emptied if it was
+            # filled.  This catches whether anything has changed.
+            if pallet_box.box.is_filled():
+                box_management = BoxManagementClass()
+                box_management.box_consume(pallet_box.box)
+
+        if forms_missing_box_number > 0:
+            # error reported on box_form
+            logger.debug("forms_missing_box_number > 0")
+            return self.show_forms_response(
+                request,
+                move_pallet_form,
+                box_forms,
+                pallet_form,
+            )
+
+        if duplicate_box_numbers:
+            duplicate_box_numbers = [str(k) for k in duplicate_box_numbers]
+            message = f"Duplicate box numbers: {', '.join(duplicate_box_numbers)}"
+            logger.debug(message)
+            move_pallet_form.add_error(None, message)
+            return self.show_forms_response(
+                request,
+                move_pallet_form,
+                box_forms,
+                pallet_form,
+            )
+
+        box_management = BoxManagementClass()
+        box_management.pallet_finish(pallet)
+
+        return render(
+            request,
+            self.confirmation_template,
+            {
+                'location': location,
+                'boxes': boxes_by_box_number.values(),
+            },
+        )
 
 
-
-        return super().form_valid(form)
 
 class LocTierListView(LoginRequiredMixin, ListView):
     """
