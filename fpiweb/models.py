@@ -18,11 +18,11 @@ __author__ = '(Multiple)'
 __project__ = "Food-Pantry-Inventory"
 __creation_date__ = "04/01/2019"
 
-
 MONTH_VALIDATORS = [
     MinValueValidator(1),
     MaxValueValidator(12),
 ]
+
 
 class LocRow(models.Model):
     """
@@ -394,7 +394,6 @@ class Product(models.Model):
 
 
 class BoxNumber:
-
     # This regex may be used to determine if string is a properly formatted
     # box number.
     box_number_regex = re_compile(r'^BOX\d{5}$')
@@ -609,6 +608,72 @@ class Box(models.Model):
         )
 
 
+class MovePallet(models.Model):
+    class Meta:
+        ordering = ('name',)
+        app_label = 'fpiweb'
+        verbose_name_plural = 'Pallets'
+
+    # Pallet Status Names
+    FILL: str = 'Fill'
+    MERGE: str = 'Merge'
+    MOVE: str = "Move"
+
+    PALLET_STATUS_CHOICES = (
+        (FILL, 'Fill pallet for new location'),
+        (MERGE, 'Merging boxes on pallet'),
+        (MOVE, 'Moving boxes to new location'),
+    )
+
+    id_help_text = 'Internal record identifier for a pallet.'
+    id = models.AutoField(
+        'Internal Pallet ID',
+        primary_key=True,
+        help_text=id_help_text,
+    )
+    """ Internal record identifier for a pallet. """
+
+    name_help_text = "Name of pallet"
+    name = models.CharField(
+        'Name',
+        unique=True,
+        max_length=200,
+        help_text=name_help_text,
+    )
+    """ Name of pallet. """
+
+    location = models.ForeignKey(
+        "Location",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Pallet Location",
+    )
+
+    pallet_status_help_text = "Current status of pallet."
+    pallet_status = models.CharField(
+        'Pallet Status',
+        max_length=15,
+        choices=PALLET_STATUS_CHOICES,
+        help_text=pallet_status_help_text,
+    )
+    """ Current status of pallet """
+
+    def __str__(self) -> str:
+        """ Display the information about this pallet. """
+
+        if len(self.pallet_status) < 1:
+            display = f'Pallet for {self.name} - ' \
+                      f'status: {self.pallet_status} Default : Fill'
+
+        else:
+
+            display = f'Pallet for {self.name} - ' \
+                      f'status: {self.pallet_status} '
+
+        return display
+
+
 class Pallet(models.Model):
     """
     Temporary file to build up a list of boxes on a pallet.
@@ -666,8 +731,16 @@ class Pallet(models.Model):
 
     def __str__(self) -> str:
         """ Display the information about this pallet. """
-        display = f'Pallet for {self.name} - ' \
-                  f'status: {self.pallet_status}'
+
+        if len(self.pallet_status) < 1:
+            display = f'Pallet for {self.name} - ' \
+                      f'status: {self.pallet_status} Default : Fill'
+
+        else:
+
+            display = f'Pallet for {self.name} - ' \
+                      f'status: {self.pallet_status} '
+
         return display
 
 
@@ -1015,9 +1088,8 @@ class Constraints(models.Model):
         (LOCATION_EXCLUSIONS, 'Warehouse locations excluded from inventory'),
         (QUANTITY_LIMIT, 'Typical count of items in a box'),
         (FUTURE_EXP_YEAR_LIMIT,
-            'Maximum years of future expiration permitted'),
+         'Maximum years of future expiration permitted'),
     )
-
 
     # Constraint Type Choice Names
     INT_RANGE = 'Int-MM'
@@ -1120,6 +1192,7 @@ class Constraints(models.Model):
         try:
             constraint = Constraints.objects.get(
                 constraint_name__iexact=constraint_name)
+
         except Constraints.DoesNotExist:
             return None
 

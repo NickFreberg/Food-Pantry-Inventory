@@ -52,7 +52,7 @@ from fpiweb.views import \
     ManualCheckinBoxView, \
     ManualConsumeBoxView, \
     ManualBoxStatusView, \
-    ManualNewBoxView, AddUserView, EditUserView, DeleteUserView
+    ManualNewBoxView, AddUserView, EditUserView, DeleteUserView, MovePalletView, MovePalletManagementView
 
 # from fpiweb.views import ConstraintDetailView
 
@@ -62,6 +62,10 @@ __creation_date__ = "04/01/2019"
 
 # set the namespace for the application
 app_name = 'fpiweb'
+
+
+
+
 
 urlpatterns = [
 
@@ -159,7 +163,7 @@ urlpatterns = [
     # e.g. /fpiweb/delete_user
     path('delete_user', DeleteUserView.as_view(), name='delete_user'),
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    path('move_pallet', MovePalletView.as_view(), name='move_pallet'),
 
 
     # Constraint List page
@@ -237,6 +241,11 @@ urlpatterns = [
         BuildPalletView.as_view(),
         name='build_pallet'
     ),
+    path(
+        'move_pallet/',
+        MovePalletView.as_view(),
+        name='move_pallet'
+    ),
 
     # Manual box management menu
     # e.g. /fpiweb/manualmenu/ = show manual box management menu
@@ -288,12 +297,21 @@ urlpatterns = [
         name='palletManagement',
     ),
 
+    path(
+        'move/pallet/management/',
+        MovePalletManagementView.as_view(),
+        name='movepalletManagement',
+    ),
+
     path('build_pallet/', BuildPalletView.as_view(), name='build_pallet'),
+
 
     path(
         'build_pallet/<int:box_pk>/',
         BuildPalletView.as_view(),
         name='build_pallet_add_box'),
+
+
 
     path('pallet/select/', PalletSelectView.as_view(), name='pallet_select'),
 

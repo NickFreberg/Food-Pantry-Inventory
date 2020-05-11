@@ -49,6 +49,7 @@ def month_choices():
         [(str(i), str(i)) for i in range(1, 13)]
     )
 
+
 def expire_year_choices():
     current_year = CURRENT_YEAR
     exp_year_limit_key = Constraints.FUTURE_EXP_YEAR_LIMIT
@@ -209,6 +210,7 @@ def validate_exp_month_start_end(exp_month_start: Optional[int],
         )
     return True
 
+
 class Html5DateInput(DateInput):
     input_type = 'date'
 
@@ -246,6 +248,43 @@ class EditUserForm(Form):
 class DeleteUserForm(Form):
     username = CharField(label='User Name', max_length=100, )
     # The working form should display the list of users in the database as a checklist and have option to delete
+
+
+class MovePalletForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = (
+            'loc_row',
+            'loc_bin',
+            'loc_tier',
+        )
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        # The values returned are LocRow, LocBin, and LocTier objects
+        loc_row = cleaned_data['loc_row']
+        loc_bin = cleaned_data['loc_bin']
+        loc_tier = cleaned_data['loc_tier']
+
+        try:
+            self.instance = Location.objects.get(
+                loc_row=loc_row,
+                loc_bin=loc_bin,
+                loc_tier=loc_tier,
+            )
+
+        except Location.DoesNotExist:
+            raise forms.ValidationError(
+                "Locations row={} bin={} tier={} not found.".format(
+                    loc_row.loc_row,
+                    loc_bin.loc_bin,
+                    loc_tier.loc_tier,
+                )
+            )
+
+        return cleaned_data
 
 
 class LocRowForm(forms.ModelForm):
@@ -365,7 +404,6 @@ class LocBinForm(forms.ModelForm):
             )
         return
 
-
     def clean(self):
         """
         Clean and validate the data given for the bin record.
@@ -418,9 +456,9 @@ class LocTierForm(forms.ModelForm):
                 and \
                 (len(loc_tier_name) >= min_len) \
                 and \
-                (loc_tier_name[0].isalpha())\
+                (loc_tier_name[0].isalpha()) \
                 and \
-                (loc_tier_name[1].isdigit())\
+                (loc_tier_name[1].isdigit()) \
                 :
             ...
         else:
@@ -654,6 +692,7 @@ class BuildPalletForm(forms.ModelForm):
         )
 
     def clean(self):
+
         cleaned_data = super().clean()
 
         # The values returned are LocRow, LocBin, and LocTier objects
@@ -667,9 +706,10 @@ class BuildPalletForm(forms.ModelForm):
                 loc_bin=loc_bin,
                 loc_tier=loc_tier,
             )
+
         except Location.DoesNotExist:
             raise forms.ValidationError(
-                "Location row={} bin={} tier={} not found.".format(
+                "Locations row={} bin={} tier={} not found.".format(
                     loc_row.loc_row,
                     loc_bin.loc_bin,
                     loc_tier.loc_tier,
@@ -737,7 +777,6 @@ class BoxItemForm(forms.Form):
 
 
 class PrintLabelsForm(forms.Form):
-
     starting_number = forms.IntegerField()
 
     number_to_print = forms.IntegerField(
@@ -755,6 +794,7 @@ class BoxTypeForm(forms.Form):
 
 class ExistingBoxTypeForm(BoxTypeForm):
     """A form to validate that the box type exists."""
+
     def clean(self):
         """Validate the box type."""
         cleaned_data = super().clean()
@@ -794,6 +834,7 @@ class ExistingProductForm(ProductForm):
 
 class LocationForm(forms.ModelForm):
     """A form for use whenever you need to select row, bin, and tier"""
+
     class Meta:
         model = Location
         fields = (
@@ -882,7 +923,6 @@ class NewBoxNumberField(BoxNumberField):
 
 
 class NewBoxNumberForm(forms.Form):
-
     box_number = NewBoxNumberField(
         max_length=Box.box_number_max_length,
     )
@@ -906,7 +946,6 @@ class EmptyBoxNumberField(BoxNumberField):
 
 
 class EmptyBoxNumberForm(forms.Form):
-
     box_number = EmptyBoxNumberField(
         max_length=Box.box_number_max_length,
     )
@@ -930,7 +969,6 @@ class FilledBoxNumberField(BoxNumberField):
 
 
 class FilledBoxNumberForm(forms.Form):
-
     box_number = FilledBoxNumberField(
         max_length=Box.box_number_max_length,
     )
@@ -952,14 +990,12 @@ class ExtantBoxNumberField(BoxNumberField):
 
 
 class ExtantBoxNumberForm(forms.Form):
-
     box_number = ExtantBoxNumberField(
         max_length=Box.box_number_max_length,
     )
 
 
 class PalletSelectForm(forms.Form):
-
     pallet = ModelChoiceField(
         queryset=Pallet.objects.order_by('name'),
         empty_label='Select a Pallet',

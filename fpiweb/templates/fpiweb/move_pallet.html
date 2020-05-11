@@ -1,0 +1,109 @@
+{% extends 'fpiweb/base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% load form %}
+{% comment %}
+
+CONTEXT VARIABLES
+-----------------
+form:       The MovePalletForm
+box_forms:  Formset of BoxItemForms
+pallet_form:     A HiddenPalletForm
+
+{% endcomment %}
+
+{% block title %}
+Move Pallet
+{% endblock %}
+
+{% block content %}
+<style>
+
+div.location{
+}
+
+div.coordinate{
+    float: left;
+    padding-left: 1rem;
+}
+
+div.coordinate_label{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+</style>
+
+{% include 'fpiweb/scanner.html' %}
+
+<div>{# root div of page #}
+
+  <form action="{% url 'fpiweb:move_pallet' %}" method="post">
+    {% csrf_token %}
+    {{ pallet_form.pallet }}
+    {{ box_forms.management_form }}
+
+    <h1>Move Pallet</h1>
+    <div class="row">
+      <a href="{% url 'fpiweb:index' %}">Return to main page.</a>
+    </div>
+    <div class="row">
+      <a href="{% url 'fpiweb:move_pallet' %}">Select another pallet.</a>
+    </div>
+
+    <div class="row">
+        <label> Move Pallet:</label> {{ pallet_form.pallet }}
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="coordinate_label">
+          Row
+        </div>
+        {% bootstrap_field form.loc_row  show_help=False show_label=False %}
+      </div>
+      <div class="col-md-2">
+        <div class="coordinate_label">
+          Bin
+        </div>
+        {% bootstrap_field form.loc_bin  show_help=False show_label=False %}
+      </div>
+      <div class="col-md-2">
+        <div class="coordinate_label">
+          Tier
+        </div>
+        {% bootstrap_field form.loc_tier show_help=False show_label=False %}
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="row">
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        </div>
+    {% endif %}
+
+    <div class="row" style="margin-bottom: 1rem;">
+      {# by default a button acts like <input type="submit"> type="button" disables this behavior #}
+      <button class="btn btn-primary">Move Pallet</button>
+    </div>
+    <div class="row">
+
+    </div>
+  </form>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block footer_javascript %}
+
+  <!-- boilerplate code for scannning functionality -->
+  <script src="{% static '/fpiweb/webrtc-adapter-1.0.2.js' %}"></script>
+  <script src="{% static '/fpiweb/js.cookie.js' %}"></script>
+  <script src="{% static '/fpiweb/ajaxSetup.js' %}"></script>
+  <script src="{% static '/fpiweb/scanner.js' %}"></script>
+  <script src="{% static '/fpiweb/move_pallet.js' %}"></script>
+
+{% endblock %}
