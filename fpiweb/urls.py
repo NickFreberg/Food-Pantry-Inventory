@@ -52,7 +52,7 @@ from fpiweb.views import \
     ManualCheckinBoxView, \
     ManualConsumeBoxView, \
     ManualBoxStatusView, \
-    ManualNewBoxView, AddUserView, EditUserView, DeleteUserView, MovePalletView
+    ManualNewBoxView, AddUserView, EditUserView, DeleteUserView, MovePalletView, MovePalletManagementView
 
 # from fpiweb.views import ConstraintDetailView
 
@@ -295,6 +295,12 @@ urlpatterns = [
         'pallet/management/',
         PalletManagementView.as_view(),
         name='palletManagement',
+    ),
+
+    path(
+        'move/pallet/management/',
+        MovePalletManagementView.as_view(),
+        name='movepalletManagement',
     ),
 
     path('build_pallet/', BuildPalletView.as_view(), name='build_pallet'),

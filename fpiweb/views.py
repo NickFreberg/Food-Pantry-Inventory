@@ -91,7 +91,6 @@ def error_page(
         message=None,
         message_list=tuple(),
         status=400):
-
     return render(
         request,
         'fpiweb/error.html',
@@ -124,15 +123,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
         current_user = self.request.user
-        profile=Profile.objects.get(user=current_user)
-        context={
+        profile = Profile.objects.get(user=current_user)
+        context = {
             'first_name': current_user.first_name,
             'last_name': current_user.last_name,
             'title': profile.title,
             'email': current_user.email
         }
         return context
-
 
 
 class AboutView(TemplateView):
@@ -349,6 +347,7 @@ class LocBinDeleteView(LoginRequiredMixin, DeleteView):
                                     kwargs={'pk': self.get_object().id})
         return context
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -437,12 +436,13 @@ class DeleteUserView(FormView):
 
         return super().form_valid(form)
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class MovePalletView(FormView):
     form_template = 'fpiweb/move_pallet.html'
     confirmation_template = 'fpiweb/move_pallet_confirmation.html'
 
-    build_pallet_form_prefix = 'move_pallet'
+    move_pallet_form_prefix = 'move_pallet'
     formset_prefix = 'box_forms'
     hidden_pallet_form_prefix = 'pallet'
 
@@ -455,10 +455,6 @@ class MovePalletView(FormView):
 
     PALLET_SELECT_FORM_NAME = 'pallet_select_form'
     PALLET_NAME_FORM_NAME = 'pallet_name_form'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.move_pallet_form_prefix = None
 
     def show_forms_response(
             self,
@@ -489,13 +485,13 @@ class MovePalletView(FormView):
         )
 
     @staticmethod
-    def show_pallet_management_page(
+    def show_move_pallet_management_page(
             request,
             pallet_select_form=None,
             pallet_name_form=None,
             status_code=200):
 
-        return PalletManagementView.show_page(
+        return MovePalletManagementView.show_page(
             request,
             page_title=MovePalletView.page_title,
             prompt="Select an existing pallet",
@@ -508,7 +504,7 @@ class MovePalletView(FormView):
     def get(self, request):
         # Show page to select/add new pallet.  This page will POST back to this
         # view
-        return self.show_pallet_management_page(request)
+        return self.show_move_pallet_management_page(request)
 
     def post(self, request):
         # BuildPalletView.post
@@ -539,7 +535,7 @@ class MovePalletView(FormView):
         if form_name == self.PALLET_SELECT_FORM_NAME:
             pallet_select_form = PalletSelectForm(request.POST)
             if not pallet_select_form.is_valid():
-                return self.show_pallet_management_page(
+                return self.show_move_pallet_management_page(
                     request,
                     pallet_select_form=pallet_select_form,
                     status_code=400,
@@ -549,7 +545,7 @@ class MovePalletView(FormView):
         if form_name == self.PALLET_NAME_FORM_NAME:
             pallet_name_form = PalletNameForm(request.POST)
             if not pallet_name_form.is_valid():
-                return self.show_pallet_management_page(
+                return self.show_move_pallet_management_page(
                     request,
                     pallet_name_form=pallet_name_form,
                     status_code=400,
@@ -739,7 +735,6 @@ class MovePalletView(FormView):
                 'boxes': boxes_by_box_number.values(),
             },
         )
-
 
 
 class LocTierListView(LoginRequiredMixin, ListView):
@@ -1511,7 +1506,6 @@ class ScannerView(View):
 
 
 class PrintLabelsView(View):
-
     template_name = 'fpiweb/print_labels.html'
 
     @staticmethod
@@ -1560,7 +1554,6 @@ class PrintLabelsView(View):
 
 
 class BoxItemFormView(LoginRequiredMixin, View):
-
     template_name = 'fpiweb/box_form.html'
 
     @staticmethod
@@ -1763,8 +1756,8 @@ class MANUAL_NOTICE_TYPE(Enum):
     """
     Manual generic notice type.
     """
-    NOTICE:str = 'NOTICE'
-    QUESTION:str = 'QUESTION'
+    NOTICE: str = 'NOTICE'
+    QUESTION: str = 'QUESTION'
 
 
 def manual_generic_notification(
@@ -1927,7 +1920,6 @@ class ManualPalletStatus(LoginRequiredMixin, ListView):
 
 
 class ActivityDownloadView(LoginRequiredMixin, View):
-
     date_format = '%m/%d/%Y'
 
     class Echo:
@@ -2104,7 +2096,7 @@ class ManualNewBoxView(LoginRequiredMixin, View):
             box=None,
             box_type=None,
             box_type_form=None,
-            errors: Optional[list]=None):
+            errors: Optional[list] = None):
         return {
             'mode': mode,
             'box_number_form': box_number_form,
@@ -2209,7 +2201,7 @@ class ManualCheckinBoxView(LoginRequiredMixin, View):
             location=None,
             exp_year_form=None,
             exp_year=None,
-            errors: Optional[list]=None):
+            errors: Optional[list] = None):
         return {
             'mode': mode,
             'box_number_form': box_number_form,
@@ -2496,7 +2488,7 @@ class ManualConsumeBoxView(LoginRequiredMixin, View):
             product=None,
             location_form=None,
             location=None,
-            errors: Optional[list]=None):
+            errors: Optional[list] = None):
         return {
             'mode': mode,
             'box_number_form': box_number_form,
@@ -2622,7 +2614,7 @@ class ManualMoveBoxView(LoginRequiredMixin, View):
             box_number_form=None,
             box=None,
             location_form=None,
-            errors: Optional[list]=None):
+            errors: Optional[list] = None):
         return {
             'mode': mode,
             'box_number_form': box_number_form,
@@ -2768,7 +2760,6 @@ class PalletManagementView(LoginRequiredMixin, View):
             pallet_select_form=None,
             pallet_name_form=None,
             status_code=200):
-
         context = {
             'page_title': page_title,
             'show_delete': show_delete,
@@ -2787,10 +2778,40 @@ class PalletManagementView(LoginRequiredMixin, View):
         return self.show_page(request)
 
 
+class MovePalletManagementView(LoginRequiredMixin, View):
+    """Select current pallet, add new pallet, delete pallet"""
+
+    template_name = 'fpiweb/move_pallet_management.html'
+
+    @staticmethod
+    def show_page(
+            request,
+            page_title='Pallet Management',
+            show_delete=True,
+            prompt=None,
+            pallet_select_form=None,
+            pallet_name_form=None,
+            status_code=200):
+        context = {
+            'page_title': page_title,
+            'show_delete': show_delete,
+            'prompt': prompt,
+            'pallet_select_form': pallet_select_form or PalletSelectForm(),
+            'pallet_name_form': pallet_name_form or PalletNameForm(),
+        }
+        return render(
+            request,
+            MovePalletManagementView.template_name,
+            context,
+            status=status_code
+        )
+
+    def get(self, request):
+        return self.show_page(request)
+
 
 # TODO: Might be able to convert this into FormView
 class PalletSelectView(LoginRequiredMixin, FormView):
-
     template_name = 'fpiweb/pallet_select.html'
     success_url = reverse_lazy('fpiweb:index')
     form_class = PalletSelectForm
