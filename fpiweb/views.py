@@ -440,7 +440,7 @@ class DeleteUserView(FormView):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class MovePalletView(FormView):
     form_template = 'fpiweb/move_pallet.html'
-    confirmation_template = 'fpiweb/build_pallet_confirmation.html'
+    confirmation_template = 'fpiweb/move_pallet_confirmation.html'
 
     build_pallet_form_prefix = 'move_pallet'
     formset_prefix = 'box_forms'
@@ -455,6 +455,10 @@ class MovePalletView(FormView):
 
     PALLET_SELECT_FORM_NAME = 'pallet_select_form'
     PALLET_NAME_FORM_NAME = 'pallet_name_form'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.move_pallet_form_prefix = None
 
     def show_forms_response(
             self,
@@ -494,7 +498,7 @@ class MovePalletView(FormView):
         return PalletManagementView.show_page(
             request,
             page_title=MovePalletView.page_title,
-            prompt="Select an existing pallet or create a new one to continue",
+            prompt="Select an existing pallet",
             show_delete=False,
             pallet_select_form=pallet_select_form,
             pallet_name_form=pallet_name_form,
@@ -517,7 +521,7 @@ class MovePalletView(FormView):
 
         if form_name is None:
             # Processing contents of build_pallet.html
-            return self.process_build_pallet_forms(request)
+            return self.process_move_pallet_forms(request)
 
         if form_name not in [
             self.PALLET_SELECT_FORM_NAME,
@@ -601,7 +605,7 @@ class MovePalletView(FormView):
             status=200,
         )
 
-    def process_build_pallet_forms(self, request):
+    def process_move_pallet_forms(self, request):
 
         move_pallet_form = MovePalletForm(
             request.POST,
@@ -618,7 +622,7 @@ class MovePalletView(FormView):
 
         move_pallet_form_valid = move_pallet_form.is_valid()
         if not move_pallet_form_valid:
-            logger.debug("BuildPalletForm not valid")
+            logger.debug("MovePalletForm not valid")
 
         box_forms_valid = box_forms.is_valid()
         if not box_forms_valid:
