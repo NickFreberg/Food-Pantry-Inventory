@@ -58,6 +58,7 @@ from fpiweb.forms import BoxItemForm, \
     FilledBoxNumberForm, \
     ExtantBoxNumberForm, \
     BuildPalletForm, \
+    MovePalletForm, \
     ConstraintsForm, \
     ExistingLocationForm, \
     HiddenPalletForm, \
@@ -437,7 +438,28 @@ class DeleteUserView(FormView):
         return super().form_valid(form)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class MovePalletView(FormView):
+    template_name = 'fpiweb/move_pallet.html'
+    form_class = MovePalletForm
+    success_url = reverse_lazy('fpiweb:move_pallet')
 
+    def form_valid(self, form):
+        pallet = form.cleaned_data.get('pallet')
+        location = form.cleaned_data.get('location')
+
+        user = authenticate(
+            request=self.request,
+            pallet=pallet,
+            location=location
+        )
+
+        if pallet is None:
+            form.add_error(None, "Invalid pallet")
+            return self.form_invalid(form)
+
+
+
+        return super().form_valid(form)
 
 class LocTierListView(LoginRequiredMixin, ListView):
     """

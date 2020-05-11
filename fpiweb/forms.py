@@ -247,6 +247,9 @@ class DeleteUserForm(Form):
     username = CharField(label='User Name', max_length=100, )
     # The working form should display the list of users in the database as a checklist and have option to delete
 
+class MovePalletForm(Form):
+    pallet = CharField(label = 'Move Pallet', max_length = 100,)
+    location = CharField(label = 'New Location', max_length=100,)
 
 class LocRowForm(forms.ModelForm):
     """
