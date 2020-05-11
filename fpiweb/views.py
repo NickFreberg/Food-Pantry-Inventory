@@ -10,7 +10,7 @@ from json import loads
 from logging import getLogger, debug, info
 from string import digits
 from typing import Optional
-
+from pathlib import Path
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -1543,7 +1543,7 @@ class PrintLabelsView(View):
 
         buffer = BytesIO()
 
-        QRCodePrinter(url_prefix='').print(
+        QRCodePrinter(Path.cwd() / 'scans').print(
             starting_number=form.cleaned_data.get('starting_number'),
             count=form.cleaned_data.get('number_to_print'),
             buffer=buffer,

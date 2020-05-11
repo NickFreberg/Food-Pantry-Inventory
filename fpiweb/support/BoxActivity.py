@@ -75,7 +75,7 @@ class BoxActivityClass:
 
     def box_new(self, box_id: Box.id):
         """
-        Record that a new (empty) box has been added to inventory.
+        Record that a new (em.ppty) box has been added to inventory.
 
         :param box_id: internal box ID of box being added to inventory
         :return:
